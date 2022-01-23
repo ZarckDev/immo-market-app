@@ -29,22 +29,27 @@ function Profile() {
   const onSubmit = async () => {
     try {
       // something to update ?
-      auth.currentUser.displayName !== name && // Update display name
-        (await updateProfile(auth.currentUser, {
-          displayName: name,
-        }));
+      if (
+        auth.currentUser.displayName !== name ||
+        auth.currentUser.email !== email
+      ) {
+        auth.currentUser.displayName !== name && // Update display name
+          (await updateProfile(auth.currentUser, {
+            displayName: name,
+          }));
 
-      auth.currentUser.email !== email && // Update email
-        (await updateEmail(auth.currentUser, email));
+        auth.currentUser.email !== email && // Update email
+          (await updateEmail(auth.currentUser, email));
 
-      // Update our db in firestore
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      await updateDoc(userRef, {
-        name,
-        email,
-      });
+        // Update our db in firestore
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userRef, {
+          name,
+          email,
+        });
 
-      toast.success('Profil mis à jour');
+        toast.success('Profil mis à jour');
+      }
     } catch (error) {
       toast.error('Impossible de mettre à jour le profil');
     }
