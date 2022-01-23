@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ReactComponent as ArrowRightIcon } from '../assets/svg/keyboardArrowRightIcon.svg';
 import visibilityIcon from '../assets/svg/visibilityIcon.svg';
+// toastify
+import { toast } from 'react-toastify';
+
+// firebase
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +22,39 @@ function SignIn() {
     }));
   };
 
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const auth = getAuth();
+
+      // register the user
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      if (userCredential.user) {
+        navigate('/');
+      }
+    } catch (error) {
+      let error_msg = '';
+      if (error.code === 'auth/wrong-password') {
+        error_msg = 'Mot de passe incorrect';
+      } else if (error.code === 'auth/invalid-email') {
+        error_msg = 'Email incorrect';
+      } else if (error.code === 'auth/user-not-found') {
+        error_msg = 'Email inconnu';
+      } else if (error.code === 'auth/too-many-requests') {
+        error_msg = 'Trop de tentatives, réessayez dans quelques instants';
+      } else {
+        error_msg = 'Identifiants inconnus';
+      }
+      toast.error(error_msg);
+    }
+  };
+
   return (
     <>
       <div className='pageContainer'>
@@ -24,7 +62,7 @@ function SignIn() {
           <p className='pageHeader'>De retour parmis nous ?</p>
         </header>
 
-        <form>
+        <form onSubmit={onSubmit}>
           <input
             type='email'
             className='emailInput'
