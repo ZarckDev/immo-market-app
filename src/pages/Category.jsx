@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+// firestore
 import {
   collection,
   getDocs,
@@ -6,17 +10,18 @@ import {
   where,
   orderBy,
   limit,
-  startAfter,
 } from 'firebase/firestore';
 import { db } from '../firebase.config';
-import { toast } from 'react-toastify';
+
+// components
 import Spinner from '../components/Spinner';
 import ListingItem from '../components/ListingItem';
 
-function Offers() {
+function Category() {
   const [listings, setListings] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [lastFetchedListing, setLastFetchedListing] = useState(null);
+
+  const params = useParams();
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -27,19 +32,20 @@ function Offers() {
         // Create a query
         const q = query(
           listingsRef,
-          where('offer', '==', true),
+          where('type', '==', params.catName),
           orderBy('timestamp', 'desc'),
           limit(10)
         );
 
         // Execute query
-        const querySnap = await getDocs(q);
+        const querySnap = await getDocs(q); // get documents for that query
 
-        const lastVisible = querySnap.docs[querySnap.docs.length - 1];
-        setLastFetchedListing(lastVisible);
+        // const lastVisible = querySnap.docs[querySnap.docs.length - 1];
+        // setLastFetchedListing(lastVisible);
 
         const listings = [];
 
+        // loop through the snapshot
         querySnap.forEach((doc) => {
           return listings.push({
             id: doc.id,
@@ -50,54 +56,19 @@ function Offers() {
         setListings(listings);
         setLoading(false);
       } catch (error) {
-        toast.error('Could not fetch listings');
+        toast.error("Nous n'avons pas pu récupérer la liste des biens");
       }
     };
 
     fetchListings();
-  }, []);
-
-  // Pagination / Load More
-  const onFetchMoreListings = async () => {
-    try {
-      // Get reference
-      const listingsRef = collection(db, 'listings');
-
-      // Create a query
-      const q = query(
-        listingsRef,
-        where('offer', '==', true),
-        orderBy('timestamp', 'desc'),
-        startAfter(lastFetchedListing),
-        limit(10)
-      );
-
-      // Execute query
-      const querySnap = await getDocs(q);
-
-      const lastVisible = querySnap.docs[querySnap.docs.length - 1];
-      setLastFetchedListing(lastVisible);
-
-      const listings = [];
-
-      querySnap.forEach((doc) => {
-        return listings.push({
-          id: doc.id,
-          data: doc.data(),
-        });
-      });
-
-      setListings((prevState) => [...prevState, ...listings]);
-      setLoading(false);
-    } catch (error) {
-      toast.error('Could not fetch listings');
-    }
-  };
+  }, [params.catName]);
 
   return (
     <div className='category'>
       <header>
-        <p className='pageHeader'>Offres</p>
+        <p className='pageHeader'>
+          {params.catName === 'louer' ? 'Logements à louer' : 'Biens à acheter'}
+        </p>
       </header>
 
       {loading ? (
@@ -118,17 +89,17 @@ function Offers() {
 
           <br />
           <br />
-          {lastFetchedListing && (
+          {/* {lastFetchedListing && (
             <p className='loadMore' onClick={onFetchMoreListings}>
-              Charger plus
+              Load More
             </p>
-          )}
+          )} */}
         </>
       ) : (
-        <p>Aucune offre pour le moment</p>
+        <p>Aucun bien à {params.catName}</p>
       )}
     </div>
   );
 }
 
-export default Offers;
+export default Category;
