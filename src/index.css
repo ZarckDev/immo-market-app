@@ -24,6 +24,7 @@ a {
 button {
   outline: none;
   border: none;
+  cursor: pointer;
 }
 
 .input,
@@ -611,7 +612,7 @@ button {
 }
 
 .profile {
-  margin-bottom: 10rem;
+  padding-bottom: 10rem;
 }
 
 .profileHeader {

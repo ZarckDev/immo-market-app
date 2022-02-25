@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 //toastify
 import { toast } from 'react-toastify';
+
+//icons
+import arrowRight from '../assets/svg/keyboardArrowRightIcon.svg';
+import homeIcon from '../assets/svg/homeIcon.svg';
 
 // firebase
 import { getAuth, updateProfile, updateEmail } from 'firebase/auth';
@@ -106,6 +110,12 @@ function Profile() {
             />
           </form>
         </div>
+
+        <Link to='/create-listing' className='createListing'>
+          <img src={homeIcon} alt='home' />
+          <p>Vendre ou Louer votre bien</p>
+          <img src={arrowRight} alt='arrow right' />
+        </Link>
       </main>
     </div>
   );
